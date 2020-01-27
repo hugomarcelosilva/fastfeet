@@ -29,10 +29,21 @@ class DeliveryManController {
       email: Yup.string()
         .email()
         .required(),
+      avatar_id: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails' });
+    }
+
+    const { avatar_id } = req.body;
+
+    const file = await File.findOne({
+      where: { id: avatar_id },
+    });
+
+    if (!file) {
+      return res.status(401).json({ error: 'File not found' });
     }
 
     const deliveryManExists = await DeliveryMan.findOne({

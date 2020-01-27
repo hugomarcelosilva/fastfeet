@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import multerConfig from './config/multer';
 
+import DeliveryController from './app/controllers/DeliveryController';
 import DeliveryManController from './app/controllers/DeliveryManController';
 import FileController from './app/controllers/FileController';
 import RecipientController from './app/controllers/RecipientController';
@@ -24,6 +25,11 @@ routes.get('/deliveryman', DeliveryManController.index);
 routes.post('/deliveryman', DeliveryManController.store);
 routes.put('/deliveryman/:id', DeliveryManController.update);
 routes.delete('/deliveryman/:id', DeliveryManController.delete);
+
+routes.get('/delivery', DeliveryController.index);
+routes.post('/delivery', DeliveryController.store);
+routes.put('/delivery/:id', DeliveryController.update);
+routes.delete('/delivery/:id', DeliveryController.delete);
 
 routes.post('/recipients', RecipientController.store);
 routes.put('/recipients/:id', RecipientController.update);
