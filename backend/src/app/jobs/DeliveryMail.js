@@ -13,7 +13,7 @@ class DeliveryMail {
       subject: 'Encomenda cadastrada',
       template: 'delivery',
       context: {
-        id: delivery.id,
+        id: delivery_man.id,
         product: delivery.product,
       },
     });

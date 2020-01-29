@@ -18,18 +18,17 @@ class UserController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const userExists = await User.findOne({ where: { email: req.body.email } });
+    const { email } = req.body;
+
+    const userExists = await User.findOne({ where: { email } });
 
     if (userExists) {
-      return res.status(400).json({ error: 'Email already registered.' });
+      return res.status(400).json({ error: 'User already registered.' });
     }
 
-    const { id, name, email } = await User.create(req.body);
-    return res.json({
-      id,
-      name,
-      email,
-    });
+    const user = await User.create(req.body);
+
+    return res.json(user);
   }
 }
 
