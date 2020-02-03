@@ -2,8 +2,10 @@ import { Router } from 'express';
 import multer from 'multer';
 import multerConfig from './config/multer';
 
+import DeliveryCancelController from './app/controllers/DeliveryCancelController';
 import DeliveryController from './app/controllers/DeliveryController';
 import DeliveryManController from './app/controllers/DeliveryManController';
+import DeliveryProblemController from './app/controllers/DeliveryProblemController';
 import DeliveryStatusController from './app/controllers/DeliveryStatusController';
 import FileController from './app/controllers/FileController';
 import RecipientController from './app/controllers/RecipientController';
@@ -24,6 +26,11 @@ routes.put(
   upload.single('file'),
   DeliveryStatusController.update
 );
+
+routes.get('/delivery/:id/problems', DeliveryProblemController.index);
+routes.post('/delivery/:id/problems', DeliveryProblemController.store);
+
+routes.post('/problem/:id/cancel-delivery', DeliveryCancelController.store);
 
 routes.use(authMiddleware);
 

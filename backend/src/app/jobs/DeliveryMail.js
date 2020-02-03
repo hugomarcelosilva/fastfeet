@@ -10,11 +10,13 @@ class DeliveryMail {
 
     await Mail.sendMail({
       to: `${delivery_man.name} <${delivery_man.email}>`,
-      subject: 'Encomenda cadastrada',
+      subject: 'Nova Encomenda',
       template: 'delivery',
       context: {
         id: delivery_man.id,
+        delivery_man: delivery_man.name,
         product: delivery.product,
+        delivery_id: delivery.id,
       },
     });
   }
