@@ -67,7 +67,7 @@ describe('Recipient', () => {
       .send(recipient)
       .set('Authorization', `Bearer ${body.token}`);
 
-    expect(status).toBe(400);
+    expect(status).toBe(401);
   });
 
   it('should be able to update recipient', async () => {

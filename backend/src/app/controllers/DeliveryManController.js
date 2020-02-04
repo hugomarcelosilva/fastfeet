@@ -6,18 +6,6 @@ import File from '../models/File';
 
 class DeliveryManController {
   async index(req, res) {
-    const { id } = req.query;
-
-    if (id) {
-      const deliveryManExists = await DeliveryMan.findByPk(id);
-
-      if (!deliveryManExists) {
-        return res.status(400).json({ error: 'DeliveryMan not found.' });
-      }
-
-      return res.json(deliveryManExists);
-    }
-
     const deliveryMen = await DeliveryMan.findAll();
 
     return res.json(deliveryMen);
@@ -43,7 +31,7 @@ class DeliveryManController {
     });
 
     if (!file) {
-      return res.status(401).json({ error: 'File not found' });
+      return res.status(400).json({ error: 'File not found' });
     }
 
     const deliveryManExists = await DeliveryMan.findOne({
@@ -51,7 +39,7 @@ class DeliveryManController {
     });
 
     if (deliveryManExists) {
-      return res.status(400).json({ error: 'DeliveryMan already exists.' });
+      return res.status(401).json({ error: 'DeliveryMan already exists.' });
     }
 
     const deliveryMan = await DeliveryMan.create(req.body);
@@ -61,7 +49,7 @@ class DeliveryManController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string(),
+      name: Yup.string().required(),
       email: Yup.string().email(),
     });
 
@@ -79,18 +67,13 @@ class DeliveryManController {
 
     const { email } = req.body;
 
-    if (email) {
+    if (email && email !== deliveryManExists.email) {
       const emailAlreadyExists = await DeliveryMan.findOne({
-        where: {
-          email,
-          id: {
-            [Op.not]: id,
-          },
-        },
+        where: { email },
       });
 
       if (emailAlreadyExists) {
-        return res.status(400).json({ error: 'DeliveryMan already exists.' });
+        return res.status(401).json({ error: 'DeliveryMan already exists.' });
       }
     }
 
@@ -125,7 +108,7 @@ class DeliveryManController {
 
     await deliveryManExists.destroy(id);
 
-    return res.json();
+    return res.status(204).send();
   }
 }
 

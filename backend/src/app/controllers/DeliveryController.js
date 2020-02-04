@@ -10,18 +10,6 @@ import Queue from '../../lib/Queue';
 
 class DeliveryController {
   async index(req, res) {
-    const { id } = req.query;
-
-    if (id) {
-      const deliveryExists = await Delivery.findByPk(id);
-
-      if (!deliveryExists) {
-        return res.status(400).json({ error: 'Delivery not found.' });
-      }
-
-      return res.json(deliveryExists);
-    }
-
     const deliveries = await Delivery.findAll();
 
     return res.json(deliveries);
@@ -46,7 +34,7 @@ class DeliveryController {
     });
 
     if (!recipient) {
-      return res.status(401).json({ error: 'Recipient not found' });
+      return res.status(400).json({ error: 'Recipient not found' });
     }
 
     const delivery_man = await DeliveryMan.findOne({
@@ -54,7 +42,7 @@ class DeliveryController {
     });
 
     if (!delivery_man) {
-      return res.status(401).json({ error: 'DeliveryMan not found' });
+      return res.status(400).json({ error: 'DeliveryMan not found' });
     }
 
     const signature = await File.findOne({
@@ -62,7 +50,20 @@ class DeliveryController {
     });
 
     if (!signature) {
-      return res.status(401).json({ error: 'Signature not found' });
+      return res.status(400).json({ error: 'Signature not found' });
+    }
+
+    const deliveryExists = await Delivery.findOne({
+      where: {
+        recipient_id,
+        deliveryman_id,
+        signature_id,
+        product: req.body.product,
+      },
+    });
+
+    if (deliveryExists) {
+      return res.status(401).json({ error: 'Delivery already exists.' });
     }
 
     const delivery = await Delivery.create(req.body);
@@ -80,37 +81,11 @@ class DeliveryController {
       recipient_id: Yup.number(),
       deliveryman_id: Yup.number(),
       signature_id: Yup.number(),
-      product: Yup.string(),
+      product: Yup.string().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails' });
-    }
-
-    const { recipient_id, deliveryman_id, signature_id } = req.body;
-
-    const recipientExists = await Recipient.findOne({
-      where: { id: recipient_id },
-    });
-
-    if (!recipientExists) {
-      return res.status(401).json({ error: 'Recipient not found' });
-    }
-
-    const deliveryManExists = await DeliveryMan.findOne({
-      where: { id: deliveryman_id },
-    });
-
-    if (!deliveryManExists) {
-      return res.status(401).json({ error: 'DeliveryMan not found' });
-    }
-
-    const signatureExists = await File.findOne({
-      where: { id: signature_id },
-    });
-
-    if (!signatureExists) {
-      return res.status(401).json({ error: 'Signature not found' });
     }
 
     const { id } = req.params;
@@ -121,14 +96,21 @@ class DeliveryController {
       return res.status(400).json({ error: 'Delivery not found.' });
     }
 
+    const { product } = req.body;
+
+    if (product && product !== deliveryExists.product) {
+      const productExists = await Delivery.findOne({
+        where: { product },
+      });
+
+      if (productExists) {
+        return res.status(401).json({ error: 'Delivery already exists.' });
+      }
+    }
+
     await deliveryExists.update(req.body);
 
-    const {
-      recipient,
-      delivery_man,
-      signature,
-      product,
-    } = await Delivery.findByPk(id, {
+    const { recipient, delivery_man, signature } = await Delivery.findByPk(id, {
       include: [
         {
           model: Recipient,
@@ -168,7 +150,7 @@ class DeliveryController {
 
     await deliveryExists.destroy(id);
 
-    return res.json();
+    return res.status(204).send();
   }
 }
 

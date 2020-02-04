@@ -8,7 +8,7 @@ describe('Session', () => {
     await truncate();
   });
 
-  it('Should be able to login', async () => {
+  it('should be able to login', async () => {
     await request(app)
       .post('/users')
       .send({
@@ -24,7 +24,7 @@ describe('Session', () => {
     expect(response.body).toHaveProperty('token');
   });
 
-  it('Should not be able to login with a unregistred email', async () => {
+  it('should not be able to login with a unregistred email', async () => {
     const user = await factory.attrs('Session');
 
     const response = await request(app)
@@ -34,7 +34,7 @@ describe('Session', () => {
     expect(response.status).toBe(400);
   });
 
-  it('Should not be able to login with a wrong password', async () => {
+  it('should not be able to login with a wrong password', async () => {
     await request(app)
       .post('/users')
       .send({
@@ -50,7 +50,7 @@ describe('Session', () => {
     expect(response.status).toBe(401);
   });
 
-  it('Should not be able to login without put a email', async () => {
+  it('should not be able to login without put a email', async () => {
     const response = await request(app)
       .post('/sessions')
       .send({ email: '', password: 'notPutEmail' });
@@ -58,7 +58,7 @@ describe('Session', () => {
     expect(response.status).toBe(400);
   });
 
-  it('Should not be able to login without put a password', async () => {
+  it('should not be able to login without put a password', async () => {
     const response = await request(app)
       .post('/sessions')
       .send({ email: 'admin@fastfeet.com', password: '' });

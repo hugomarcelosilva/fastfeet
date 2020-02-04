@@ -1,8 +1,19 @@
 import faker from 'faker';
 import { factory } from 'factory-girl';
 
+import Delivery from '../src/app/models/Delivery';
+import DeliveryMan from '../src/app/models/DeliveryMan';
 import Recipient from '../src/app/models/Recipient';
 import User from '../src/app/models/User';
+
+factory.define('Delivery', Delivery, {
+  product: faker.commerce.product(),
+});
+
+factory.define('DeliveryMan', DeliveryMan, {
+  name: faker.name.findName(),
+  email: faker.internet.email(),
+});
 
 factory.define('Recipient', Recipient, {
   name: faker.name.findName(),

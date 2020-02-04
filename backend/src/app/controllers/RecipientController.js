@@ -29,7 +29,7 @@ class RecipientController {
     });
 
     if (recipientExists) {
-      return res.status(400).json({ error: 'Recipient already exists.' });
+      return res.status(401).json({ error: 'Recipient already exists.' });
     }
 
     const recipient = await Recipient.create(req.body);

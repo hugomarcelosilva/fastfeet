@@ -10,7 +10,7 @@ describe('User', () => {
     await truncate();
   });
 
-  it('Should encrypt user password when new user is created', async () => {
+  it('should encrypt user password when new user is created', async () => {
     const user = await factory.create('User', {
       password: '12345678',
     });
@@ -20,7 +20,7 @@ describe('User', () => {
     expect(compareHash).toBe(true);
   });
 
-  it('Should be able to register', async () => {
+  it('should be able to register', async () => {
     const user = await factory.attrs('User');
 
     const response = await request(app)
@@ -30,7 +30,7 @@ describe('User', () => {
     expect(response.body).toHaveProperty('id');
   });
 
-  it('Should not be able to register with a duplicated email', async () => {
+  it('should not be able to register with a duplicated email', async () => {
     const user = await factory.attrs('User', { email: 'duplicated@gmail.com' });
     await request(app)
       .post('/users')
@@ -40,6 +40,6 @@ describe('User', () => {
       .post('/users')
       .send(user);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(401);
   });
 });
