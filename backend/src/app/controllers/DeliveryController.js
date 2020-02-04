@@ -1,4 +1,4 @@
-import * as Yup from 'yup';
+import { object, number, string } from 'yup';
 
 import Delivery from '../models/Delivery';
 import File from '../models/File';
@@ -16,11 +16,11 @@ class DeliveryController {
   }
 
   async store(req, res) {
-    const schema = Yup.object().shape({
-      recipient_id: Yup.number().required(),
-      deliveryman_id: Yup.number().required(),
-      signature_id: Yup.number().required(),
-      product: Yup.string().required(),
+    const schema = object().shape({
+      recipient_id: number().required(),
+      deliveryman_id: number().required(),
+      signature_id: number().required(),
+      product: string().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -77,11 +77,11 @@ class DeliveryController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      recipient_id: Yup.number(),
-      deliveryman_id: Yup.number(),
-      signature_id: Yup.number(),
-      product: Yup.string().required(),
+    const schema = object().shape({
+      recipient_id: number(),
+      deliveryman_id: number(),
+      signature_id: number(),
+      product: string().required(),
     });
 
     if (!(await schema.isValid(req.body))) {

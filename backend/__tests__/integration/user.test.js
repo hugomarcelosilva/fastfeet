@@ -42,4 +42,17 @@ describe('User', () => {
 
     expect(response.status).toBe(401);
   });
+
+  it('should not be able to register a new user when some field is missing', async () => {
+    const user = {
+      name: 'Recipient test',
+      email: 'user@email.com',
+    };
+
+    const { status } = await request(app)
+      .post('/users')
+      .send(user);
+
+    expect(status).toBe(400);
+  });
 });

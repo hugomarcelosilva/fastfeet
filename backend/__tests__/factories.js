@@ -3,6 +3,7 @@ import { factory } from 'factory-girl';
 
 import Delivery from '../src/app/models/Delivery';
 import DeliveryMan from '../src/app/models/DeliveryMan';
+import DeliveryProblem from '../src/app/models/DeliveryProblem';
 import Recipient from '../src/app/models/Recipient';
 import User from '../src/app/models/User';
 
@@ -13,6 +14,10 @@ factory.define('Delivery', Delivery, {
 factory.define('DeliveryMan', DeliveryMan, {
   name: faker.name.findName(),
   email: faker.internet.email(),
+});
+
+factory.define('DeliveryProblem', DeliveryProblem, {
+  description: faker.lorem.text(),
 });
 
 factory.define('Recipient', Recipient, {

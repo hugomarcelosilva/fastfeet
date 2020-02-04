@@ -1,5 +1,4 @@
-import { Op } from 'sequelize';
-import * as Yup from 'yup';
+import { object, number, string } from 'yup';
 
 import DeliveryMan from '../models/DeliveryMan';
 import File from '../models/File';
@@ -12,12 +11,12 @@ class DeliveryManController {
   }
 
   async store(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string()
+    const schema = object().shape({
+      name: string().required(),
+      email: string()
         .email()
         .required(),
-      avatar_id: Yup.number().required(),
+      avatar_id: number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -48,9 +47,9 @@ class DeliveryManController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string().email(),
+    const schema = object().shape({
+      name: string().required(),
+      email: string().email(),
     });
 
     if (!(await schema.isValid(req.body))) {
