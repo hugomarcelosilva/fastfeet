@@ -1,15 +1,15 @@
-import * as Yup from 'yup';
+import { object, string } from 'yup';
 
 import User from '../models/User';
 
 class UserController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string()
+    const schema = object().shape({
+      name: string().required(),
+      email: string()
         .email()
         .required(),
-      password: Yup.string()
+      password: string()
         .required()
         .min(6),
     });

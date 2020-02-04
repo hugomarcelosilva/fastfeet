@@ -10,7 +10,7 @@
     "queue": "nodemon src/queue.js",
     "start": "node dist/server.js",
     "pretest": "NODE_ENV=test sequelize db:migrate",
-    "test": "NODE_ENV=test jest --force-exit",
+    "test": "NODE_ENV=test jest --runInBand --force-exit",
     "posttest": "NODE_ENV=test sequelize db:migrate:undo:all"
   },
   "dependencies": {
@@ -24,31 +24,31 @@
     "express-async-errors": "^3.1.1",
     "express-handlebars": "^3.1.0",
     "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
     "nodemailer": "^6.3.1",
     "nodemailer-express-handlebars": "^3.1.0",
-    "multer": "^1.4.2",
-    "pg": "^7.12.1",
+    "pg": "^7.17.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.19.6",
+    "sequelize": "^5.21.3",
     "sequelize-cli": "^5.5.1",
     "youch": "^2.0.10",
-    "yup": "^0.27.0"
+    "yup": "^0.28.0"
   },
   "devDependencies": {
     "@sucrase/jest-plugin": "^2.0.0",
-    "@types/jest": "^24.0.23",
-    "eslint": "^6.5.1",
+    "@types/jest": "^25.1.1",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.4.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "factory-girl": "^5.0.4",
     "faker": "^4.1.0",
-    "jest": "^24.9.0",
-    "nodemon": "^1.19.4",
-    "prettier": "^1.18.2",
+    "jest": "^25.1.0",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1",
     "sqlite3": "^4.1.1",
-    "sucrase": "^3.10.1",
+    "sucrase": "^3.12.1",
     "supertest": "^4.0.2"
   }
 }

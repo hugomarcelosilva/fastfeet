@@ -1,16 +1,14 @@
-import jwt from 'jsonwebtoken';
-import * as Yup from 'yup';
+import { object, string } from 'yup';
 
-import authConfig from '../../config/auth';
 import User from '../models/User';
 
 class SessionController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      email: Yup.string()
+    const schema = object().shape({
+      email: string()
         .email()
         .required(),
-      password: Yup.string().required(),
+      password: string().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -37,9 +35,7 @@ class SessionController {
         name,
         email,
       },
-      token: jwt.sign({ id }, authConfig.secret, {
-        expiresIn: authConfig.expiresIn,
-      }),
+      token: user.generateToken(),
     });
   }
 }

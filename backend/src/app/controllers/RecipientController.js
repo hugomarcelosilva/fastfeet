@@ -1,22 +1,9 @@
-import { Op } from 'sequelize';
 import * as Yup from 'yup';
 
 import Recipient from '../models/Recipient';
 
 class RecipientController {
   async index(req, res) {
-    const { id } = req.query;
-
-    if (id) {
-      const recipientExists = await Recipient.findByPk(id);
-
-      if (!recipientExists) {
-        return res.status(400).json({ error: 'Recipient not found.' });
-      }
-
-      return res.json(recipientExists);
-    }
-
     const recipients = await Recipient.findAll();
 
     return res.json(recipients);
@@ -27,7 +14,7 @@ class RecipientController {
       name: Yup.string().required(),
       street: Yup.string().required(),
       number: Yup.number().required(),
-      complement: Yup.number(),
+      complement: Yup.string(),
       state: Yup.string().required(),
       city: Yup.string().required(),
       zip_code: Yup.string().required(),
@@ -52,10 +39,10 @@ class RecipientController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string(),
+      name: Yup.string().required(),
       street: Yup.string(),
       number: Yup.number(),
-      complement: Yup.number(),
+      complement: Yup.string(),
       state: Yup.string(),
       city: Yup.string(),
       zip_code: Yup.string(),
@@ -89,7 +76,7 @@ class RecipientController {
 
     await recipientExists.destroy(id);
 
-    return res.json();
+    return res.status(204).send();
   }
 }
 
