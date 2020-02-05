@@ -35,7 +35,10 @@ class DeliveryProblemController {
       return res.status(400).json({ error: 'Delivery not found.' });
     }
 
-    const deliveryProblem = await DeliveryProblem.create(req.body);
+    const deliveryProblem = await DeliveryProblem.create({
+      delivery_id: id,
+      description: req.body.description,
+    });
 
     return res.json(deliveryProblem);
   }

@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
-import * as Yup from 'yup';
-import { startOfDay } from 'date-fns';
+import { object, date } from 'yup';
+import { startOfDay, endOfDay } from 'date-fns';
 
 import Delivery from '../models/Delivery';
 import DeliveryMan from '../models/DeliveryMan';
@@ -25,30 +25,22 @@ class DeliveryStatusController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      start_date: Yup.date(),
-      end_date: Yup.date(),
+    const schema = object().shape({
+      start_date: date(),
+      end_date: date(),
     });
 
-    if (!(await schema.isValid(req.body))) {
+    if (!(await schema.isValid(req.query))) {
       return res.status(400).json({ error: 'Validation fails.' });
     }
 
     const { id } = req.params;
-
-    /**
-     * Deliveryman verifier
-     */
 
     const deliveryman = await DeliveryMan.findByPk(id);
 
     if (!deliveryman) {
       return res.status(400).json({ error: 'DeliveryMan not found. ' });
     }
-
-    /**
-     * Delivery verifier
-     */
 
     const { deliveryId } = req.query;
 
@@ -64,11 +56,13 @@ class DeliveryStatusController {
         .json({ error: 'Delivery not registered to the DeliveryMan. ' });
     }
 
-    /**
-     * Signature verifier if deliveryman try to update with end date
-     */
+    const { start_date, end_date } = req.query;
 
-    const { end_date } = req.query;
+    if (!start_date && !end_date) {
+      return res
+        .status(400)
+        .json({ error: 'Start date or end date need to be provided.' });
+    }
 
     if (end_date) {
       const { originalname: name, filename: path } = req.file;
@@ -91,33 +85,20 @@ class DeliveryStatusController {
       });
     }
 
-    /**
-     * Pickups per day verifier
-     */
-
-    const today = new Date();
-    const thisToday = startOfDay(today);
-
     const dayDeliveries = await Delivery.findAll({
       where: {
         deliveryman_id: id,
         start_date: {
-          [Op.between]: [thisToday, today],
+          [Op.between]: [startOfDay(new Date()), endOfDay(new Date())],
         },
       },
     });
 
     if (dayDeliveries.length >= 5) {
-      return res.status(400).json({
+      return res.status(401).json({
         error: 'This DeliveryMan has exceeded the limit of 5 pickups per day.',
       });
     }
-
-    /**
-     * End of verifications and start of update method
-     */
-
-    const { start_date } = req.query;
 
     const { product, recipient_id } = await delivery.update({
       start_date,
