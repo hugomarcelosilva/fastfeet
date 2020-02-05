@@ -44,6 +44,9 @@ yarn sequelize db:seed:all
 # iniciar servidor da aplicação
 yarn dev
 
+# executar os testes
+yarn test
+
 ```
 
 ---
