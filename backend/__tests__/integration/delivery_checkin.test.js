@@ -6,41 +6,9 @@ import factory from '../factories';
 import truncate from '../util/truncate';
 import getToken from '../getToken';
 
-describe('DeliveryStatus', () => {
+describe('DeliveryCheckIn', () => {
   beforeEach(async () => {
     await truncate();
-  });
-
-  it('should be able to list deliveries to delivery man that are not canceled or delivered', async () => {
-    const delivery_man = await factory.attrs('DeliveryMan');
-
-    const { body } = await getToken();
-
-    const responseFile = await request(app)
-      .post('/files')
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseDeliveryMan = await request(app)
-      .post('/deliverymen')
-      .send({
-        name: delivery_man.name,
-        email: delivery_man.email,
-        avatar_id: responseFile.body.id,
-      })
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const { status } = await request(app).get(
-      `/deliveryman/${responseDeliveryMan.body.id}/deliveries`
-    );
-
-    expect(status).toBe(200);
-  });
-
-  it('should not be able to list deliveries when delivery man is not found', async () => {
-    const { status } = await request(app).get('/deliveryman/0/deliveries');
-
-    expect(status).toBe(400);
   });
 
   it('should be able to update the start date of delivery', async () => {
@@ -80,57 +48,12 @@ describe('DeliveryStatus', () => {
       .set('Authorization', `Bearer ${body.token}`);
 
     const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id })
-      .query({ start_date: '2019-02-05' });
-
-    expect(updatedDeliveryStatus.body.start_date).toBe('2019-02-05');
-  });
-
-  it('should be able to update the end date of delivery', async () => {
-    const delivery = await factory.attrs('Delivery');
-    const delivery_man = await factory.attrs('DeliveryMan');
-    const recipient = await factory.attrs('Recipient');
-
-    const { body } = await getToken();
-
-    const responseFile = await request(app)
-      .post('/files')
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseDeliveryMan = await request(app)
-      .post('/deliverymen')
+      .put(`/deliveries/checkin/${responseDelivery.body.id}`)
       .send({
-        name: delivery_man.name,
-        email: delivery_man.email,
-        avatar_id: responseFile.body.id,
-      })
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseRecipient = await request(app)
-      .post('/recipients')
-      .send(recipient)
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseDelivery = await request(app)
-      .post('/deliveries')
-      .send({
-        recipient_id: responseRecipient.body.id,
         deliveryman_id: responseDeliveryMan.body.id,
-        signature_id: responseFile.body.id,
-        product: delivery.product,
-      })
-      .set('Authorization', `Bearer ${body.token}`);
+      });
 
-    const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id })
-      .query({ end_date: '2019-02-05' });
-
-    expect(updatedDeliveryStatus.body.end_date).toBe('2019-02-05');
+    expect(updatedDeliveryStatus.body).toHaveProperty('id');
   });
 
   it('should not be able to update delivery if validation fails', async () => {
@@ -170,18 +93,53 @@ describe('DeliveryStatus', () => {
       .set('Authorization', `Bearer ${body.token}`);
 
     const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id })
-      .query({ start_date: '20' });
+      .put(`/deliveries/checkin/${responseDelivery.body.id}`)
+      .send({});
 
     expect(updatedDeliveryStatus.status).toBe(400);
   });
 
   it('should not be able to update if delivery man not found', async () => {
+    const delivery = await factory.attrs('Delivery');
+    const delivery_man = await factory.attrs('DeliveryMan');
+    const recipient = await factory.attrs('Recipient');
+
+    const { body } = await getToken();
+
+    const responseFile = await request(app)
+      .post('/files')
+      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
+      .set('Authorization', `Bearer ${body.token}`);
+
+    const responseDeliveryMan = await request(app)
+      .post('/deliverymen')
+      .send({
+        name: delivery_man.name,
+        email: delivery_man.email,
+        avatar_id: responseFile.body.id,
+      })
+      .set('Authorization', `Bearer ${body.token}`);
+
+    const responseRecipient = await request(app)
+      .post('/recipients')
+      .send(recipient)
+      .set('Authorization', `Bearer ${body.token}`);
+
+    const responseDelivery = await request(app)
+      .post('/deliveries')
+      .send({
+        recipient_id: responseRecipient.body.id,
+        deliveryman_id: responseDeliveryMan.body.id,
+        signature_id: responseFile.body.id,
+        product: delivery.product,
+      })
+      .set('Authorization', `Bearer ${body.token}`);
+
     const updatedDeliveryStatus = await request(app)
-      .put('/deliveryman/0/deliveries')
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'));
+      .put(`/deliveries/checkin/${responseDelivery.body.id}`)
+      .send({
+        deliveryman_id: 0,
+      });
 
     expect(updatedDeliveryStatus.status).toBe(400);
   });
@@ -206,9 +164,10 @@ describe('DeliveryStatus', () => {
       .set('Authorization', `Bearer ${body.token}`);
 
     const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: 0 });
+      .put('/deliveries/checkin/0')
+      .send({
+        deliveryman_id: responseDeliveryMan.body.id,
+      });
 
     expect(updatedDeliveryStatus.status).toBe(400);
   });
@@ -260,54 +219,10 @@ describe('DeliveryStatus', () => {
       .set('Authorization', `Bearer ${body.token}`);
 
     const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan_2.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id })
-      .query({ start_date: '2019-02-05' });
-
-    expect(updatedDeliveryStatus.status).toBe(400);
-  });
-
-  it('should not be able to update if start date or end date not provided', async () => {
-    const delivery = await factory.attrs('Delivery');
-    const delivery_man = await factory.attrs('DeliveryMan');
-    const recipient = await factory.attrs('Recipient');
-
-    const { body } = await getToken();
-
-    const responseFile = await request(app)
-      .post('/files')
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseDeliveryMan = await request(app)
-      .post('/deliverymen')
+      .put(`/deliveries/checkin/${responseDelivery.body.id}`)
       .send({
-        name: delivery_man.name,
-        email: delivery_man.email,
-        avatar_id: responseFile.body.id,
-      })
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseRecipient = await request(app)
-      .post('/recipients')
-      .send(recipient)
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const responseDelivery = await request(app)
-      .post('/deliveries')
-      .send({
-        recipient_id: responseRecipient.body.id,
-        deliveryman_id: responseDeliveryMan.body.id,
-        signature_id: responseFile.body.id,
-        product: delivery.product,
-      })
-      .set('Authorization', `Bearer ${body.token}`);
-
-    const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id });
+        deliveryman_id: responseDeliveryMan_2.body.id,
+      });
 
     expect(updatedDeliveryStatus.status).toBe(400);
   });
@@ -356,10 +271,10 @@ describe('DeliveryStatus', () => {
     });
 
     const updatedDeliveryStatus = await request(app)
-      .put(`/deliveryman/${responseDeliveryMan.body.id}/deliveries`)
-      .attach('file', path.join(__dirname, 'img/avatar.jpg'))
-      .query({ deliveryId: responseDelivery.body.id })
-      .query({ start_date: todayDate });
+      .put(`/deliveries/checkin/${responseDelivery.body.id}`)
+      .send({
+        deliveryman_id: responseDeliveryMan.body.id,
+      });
 
     expect(updatedDeliveryStatus.status).toBe(401);
   });
