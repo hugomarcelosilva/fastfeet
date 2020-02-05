@@ -26,3 +26,6 @@ Instalar os pacotes e dependências
 
 Iniciar servidor da aplicação
 `yarn dev`
+
+Executar os testes
+`yarn test`
