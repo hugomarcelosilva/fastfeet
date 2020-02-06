@@ -1,31 +1,41 @@
-﻿## Projeto
+﻿### :information_source: Instruções
 
-Fastfeet - backend
+#### :whale: Executando com Docker Compose
 
-## Instalação
+```bash
+# instalar os contâineres da API, PostgreSQL e Redis
+docker-compose up -d
+```
 
-Postgres - Banco de dados principal
-`docker run --name database -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres`
+#### :whale: Executando com Docker localmente
 
-Redis - Banco de dados para filas
-`docker run --name redis -p 6379:6379 -d -t redis:alpine`
+```bash
+# instalar PostgreSQL - Banco de dados principal
+docker run --name database -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres:11
 
-Nome do banco de dados Postgres
-`fastfeet`
+# instalar Redis - Banco de dados para filas
+docker run --name redis -p 6379:6379 -d -t redis:alpine
 
-Sequelize
-`yarn sequelize db:migrate`
+# instalar os pacotes e dependências
+yarn
+```
 
-Seed
-`yarn sequelize db:seed:all`
+Faça uma cópia do arquivo .env.example, renomeie para .env e altere as variáveis de acordo com o seu ambiente.
 
-## **Execução**
+```bash
+# nome do banco de dados Posgres
+fastfeet
 
-Instalar os pacotes e dependências
-`yarn`
+# criar estrutura do banco de dados Postgres
+yarn sequelize db:migrate
 
-Iniciar servidor da aplicação
-`yarn dev`
+# povoar o banco de dados
+yarn sequelize db:seed:all
 
-Executar os testes
-`yarn test`
+# iniciar servidor da aplicação
+yarn dev
+
+# executar os testes
+yarn test
+
+```
