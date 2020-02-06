@@ -1,6 +1,6 @@
+import request from 'supertest';
 import app from '../../src/app';
 import factory from '../factories';
-import request from 'supertest';
 import truncate from '../util/truncate';
 
 describe('Session', () => {

@@ -1,6 +1,6 @@
 import request from 'supertest';
-import app from '../../src/app';
 import path from 'path';
+import app from '../../src/app';
 
 import factory from '../factories';
 import truncate from '../util/truncate';
@@ -121,7 +121,6 @@ describe('DeliveryProblem', () => {
   it('should not be able to register a new delivery problem when some field is missing', async () => {
     const delivery = await factory.attrs('Delivery');
     const delivery_man = await factory.attrs('DeliveryMan');
-    const delivery_problem = await factory.attrs('DeliveryProblem');
     const recipient = await factory.attrs('Recipient');
 
     const { body } = await getToken();
