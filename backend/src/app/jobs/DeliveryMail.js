@@ -6,17 +6,23 @@ class DeliveryMail {
   }
 
   async handle({ data }) {
-    const { delivery_man, delivery } = data;
+    const { delivery, delivery_man, recipient } = data;
 
     await Mail.sendMail({
       to: `${delivery_man.name} <${delivery_man.email}>`,
-      subject: 'Nova Encomenda',
+      subject: 'Detalhes da entrega',
       template: 'delivery',
       context: {
         id: delivery_man.id,
-        delivery_man: delivery_man.name,
         product: delivery.product,
-        delivery_id: delivery.id,
+        delivery_man: delivery_man.name,
+        recipientName: recipient.name,
+        recipientStreet: recipient.street,
+        recipientNumber: recipient.number,
+        recipientZipCode: recipient.zip_code,
+        recipientCity: recipient.city,
+        recipientState: recipient.state,
+        recipientComplement: recipient.complement || 'Não informado',
       },
     });
   }

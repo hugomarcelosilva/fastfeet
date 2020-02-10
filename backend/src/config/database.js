@@ -2,7 +2,7 @@ require('../bootstrap');
 
 module.exports = {
   dialect: process.env.DB_DIALECT || 'postgres',
-  host: process.env.POSTGRESQL_HOST || 'localhost',
+  host: process.env.POSTGRESQL_HOST || '127.0.0.1',
   username: process.env.POSTGRESQL_USER,
   password: process.env.POSTGRESQL_PASS,
   database: process.env.POSTGRESQL_NAME,

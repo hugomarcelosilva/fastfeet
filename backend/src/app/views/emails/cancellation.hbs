@@ -1,6 +1,18 @@
 <strong>Olá, {{ delivery_man }}</strong>
-<p>A encomenda Nº {{ delivery_id }} foi cancelada</p>
+<p>Cancelamos uma encomenda após você registrar um problema na entrega:</p>
+
+<strong>Descrição do problema: </strong><br />
 <p>
-  <strong>Produto: </strong> {{ product }} <br />
-  <br />
+  {{ description }}
+</p>
+
+<strong>Detalhes da entrega:</strong><br />
+<p>
+  <strong>Produto: </strong>{{ product }}.<br />
+  <strong>Data de retirada: </strong>{{ startDate }}.<br />
+  <strong>Tentativa de entrega em: </strong>{{ endDate }}.<br />
+  <br /><br />
+  <small>
+    Agradecemos por nos informar.
+  </small>
 </p>

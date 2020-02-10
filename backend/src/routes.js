@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import multer from 'multer';
-import multerConfig from './config/multer';
 
 import DeliveryCancelController from './app/controllers/DeliveryCancelController';
 import DeliveryCheckInController from './app/controllers/DeliveryCheckInController';
@@ -8,15 +7,15 @@ import DeliveryCheckOutController from './app/controllers/DeliveryCheckOutContro
 import DeliveryClosedController from './app/controllers/DeliveryClosedController';
 import DeliveryController from './app/controllers/DeliveryController';
 import DeliveryManController from './app/controllers/DeliveryManController';
-import DeliveryProblemController from './app/controllers/DeliveryProblemController';
 import DeliveryOpenedController from './app/controllers/DeliveryOpenedController';
+import DeliveryProblemController from './app/controllers/DeliveryProblemController';
 import FileController from './app/controllers/FileController';
 import ProblemController from './app/controllers/ProblemController';
 import RecipientController from './app/controllers/RecipientController';
 import SessionController from './app/controllers/SessionController';
 import UserController from './app/controllers/UserController';
-
 import authMiddleware from './app/middlewares/auth';
+import multerConfig from './config/multer';
 
 const routes = new Router();
 const upload = multer(multerConfig);
@@ -51,10 +50,12 @@ routes.get('/problems', ProblemController.index);
 
 // Verificar problemas de uma unica encomenda
 routes.get('/delivery/:id/problems', DeliveryProblemController.index);
-routes.post('/problem/:id/cancel-delivery', DeliveryCancelController.store);
 
 // Criar um problema para encomenda
 routes.post('/delivery/:id/problems', DeliveryProblemController.store);
+
+// Cancelar a encomenda
+routes.delete('/problem/:id/cancel-delivery', DeliveryCancelController.destroy);
 
 routes.use(authMiddleware);
 
