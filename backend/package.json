@@ -3,20 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "cross-env CI=true yarn test --bail --findRelatedTests",
-      "git add"
-    ]
-  },
   "scripts": {
     "commit": "git-cz",
     "dev": "nodemon src/server.js",
@@ -24,9 +10,9 @@
     "build": "sucrase ./src -d ./dist --transforms imports",
     "queue": "nodemon src/queue.js",
     "start": "node dist/server.js",
-    "pretest": "cross-env NODE_ENV=test sequelize db:migrate",
-    "test": "cross-env NODE_ENV=test jest --runInBand --force-exit",
-    "posttest": "cross-env NODE_ENV=test sequelize db:migrate:undo:all"
+    "pretest": "NODE_ENV=test sequelize db:migrate",
+    "test": "NODE_ENV=test jest --runInBand --force-exit",
+    "posttest": "NODE_ENV=test sequelize db:migrate:undo:all"
   },
   "dependencies": {
     "@sentry/node": "5.7.1",
@@ -50,14 +36,8 @@
     "yup": "^0.28.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.4",
-    "@commitlint/config-conventional": "^8.3.4",
     "@sucrase/jest-plugin": "^2.0.0",
     "@types/jest": "^25.1.1",
-    "commitizen": "^4.0.3",
-    "commitlint-config-rocketseat": "^0.0.1",
-    "cross-env": "^6.0.3",
-    "cz-conventional-changelog": "3.0.2",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.10.0",
@@ -66,18 +46,11 @@
     "eslint-plugin-prettier": "^3.1.2",
     "factory-girl": "^5.0.4",
     "faker": "^4.1.0",
-    "husky": "^3.0.9",
     "jest": "^25.1.0",
-    "lint-staged": "^9.4.3",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "sqlite3": "^4.1.1",
     "sucrase": "^3.12.1",
     "supertest": "^4.0.2"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./backend/node_modules/cz-conventional-changelog"
-    }
   }
 }
