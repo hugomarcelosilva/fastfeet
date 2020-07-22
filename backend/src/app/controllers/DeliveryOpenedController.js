@@ -2,24 +2,94 @@ import { Op } from 'sequelize';
 
 import Delivery from '../models/Delivery';
 import DeliveryMan from '../models/DeliveryMan';
+import Recipient from '../models/Recipient';
 
-class DeliveryOpenedController {
+class DeliveryClosedController {
   async index(req, res) {
-    const deliveryManExists = await DeliveryMan.findByPk(req.params.id);
+    const { id } = req.params;
 
-    if (!deliveryManExists) {
-      return res.status(400).json({ error: 'DeliveryMan not found.' });
+    const deliveryman = await DeliveryMan.findByPk(id);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found. ' });
+    }
+
+    const { page = 1, end } = req.query;
+
+    if (end) {
+      const deliveries = await Delivery.findAll({
+        where: {
+          deliveryman_id: id,
+          end_date: {
+            [Op.not]: null,
+          },
+          canceled_at: null,
+        },
+        attributes: [
+          'id',
+          'product',
+          'start_date',
+          'end_date',
+          'recipient_id',
+          'status',
+        ],
+        include: {
+          model: Recipient,
+          as: 'recipient',
+          paranoid: false,
+          attributes: [
+            'id',
+            'name',
+            'street',
+            'number',
+            'complement',
+            'city',
+            'state',
+            'zip_code',
+          ],
+        },
+        limit: 10,
+        offset: (page - 1) * 10,
+      });
+
+      return res.json(deliveries);
     }
 
     const deliveries = await Delivery.findAll({
       where: {
-        deliveryman_id: deliveryManExists.id,
-        [Op.or]: [{ canceled_at: null }, { end_date: null }],
+        deliveryman_id: id,
+        end_date: null,
+        canceled_at: null,
       },
+      attributes: [
+        'id',
+        'product',
+        'start_date',
+        'end_date',
+        'recipient_id',
+        'status',
+      ],
+      include: {
+        model: Recipient,
+        as: 'recipient',
+        paranoid: false,
+        attributes: [
+          'id',
+          'name',
+          'street',
+          'number',
+          'complement',
+          'city',
+          'state',
+          'zip_code',
+        ],
+      },
+      limit: 10,
+      offset: (page - 1) * 10,
     });
 
     return res.json(deliveries);
   }
 }
 
-export default new DeliveryOpenedController();
+export default new DeliveryClosedController();

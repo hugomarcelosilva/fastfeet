@@ -1,7 +1,4 @@
-import { Op } from 'sequelize';
-
-import { object, number } from 'yup';
-import { startOfDay, endOfDay } from 'date-fns';
+import { object, date } from 'yup';
 
 import Delivery from '../models/Delivery';
 import DeliveryMan from '../models/DeliveryMan';
@@ -10,70 +7,68 @@ import File from '../models/File';
 class DeliveryCheckOutController {
   async update(req, res) {
     const schema = object().shape({
-      deliveryman_id: number().required(),
+      start_date: date(),
+      end_date: date(),
     });
 
-    if (!(await schema.isValid(req.query))) {
+    if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails.' });
     }
 
-    const { id } = req.params;
+    const { deliveryId, deliverymanId } = req.params;
 
-    const delivery = await Delivery.findByPk(id);
+    /**
+     * Deliveryman verifier
+     */
+
+    const deliveryman = await DeliveryMan.findByPk(deliverymanId);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found. ' });
+    }
+
+    /**
+     * Delivery verifier
+     */
+
+    const delivery = await Delivery.findByPk(deliveryId);
 
     if (!delivery) {
       return res.status(400).json({ error: 'Delivery not found. ' });
     }
 
-    const { deliveryman_id } = req.query;
+    /**
+     * Signature verifier if deliveryman try to update with end date
+     */
 
-    const deliveryman = await DeliveryMan.findByPk(deliveryman_id);
+    const { signature_id } = req.body;
 
-    if (!deliveryman) {
-      return res.status(400).json({ error: 'DeliveryMan not found. ' });
-    }
+    try {
+      const signature = await File.findByPk(signature_id);
 
-    if (delivery.deliveryman_id !== deliveryman.id) {
-      return res
-        .status(400)
-        .json({ error: 'Delivery not registered to the DeliveryMan. ' });
-    }
+      if (!signature) {
+        return res
+          .status(400)
+          .json({ error: 'Signature image does not found.' });
+      }
 
-    const dayDeliveries = await Delivery.findAll({
-      where: {
-        deliveryman_id: req.query.deliveryman_id,
-        start_date: {
-          [Op.between]: [startOfDay(new Date()), endOfDay(new Date())],
-        },
-      },
-    });
-
-    if (dayDeliveries.length >= 5) {
-      return res.status(401).json({
-        error: 'This DeliveryMan has exceeded the limit of 5 pickups per day.',
+      const { product, recipient_id } = await delivery.update({
+        end_date: new Date(),
+        signature_id,
+        status: 'DELIVERED',
       });
+
+      return res.json({
+        product,
+        recipient_id,
+        signature_id,
+        end_date: new Date(),
+      });
+    } catch (err) {
+      return res
+        .status(401)
+        .json({ error: 'Error trying to finish this delivery.' });
     }
-
-    const { originalname: name, filename: path } = req.file;
-
-    const { id: signature_id } = await File.create({
-      name,
-      path,
-    });
-
-    const end_date = new Date();
-
-    const { product, recipient_id } = await delivery.update({
-      end_date,
-      signature_id,
-    });
-
-    return res.json({
-      product,
-      recipient_id,
-      signature_id,
-      end_date,
-    });
   }
 }
 

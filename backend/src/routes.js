@@ -4,7 +4,6 @@ import multer from 'multer';
 import DeliveryCancelController from './app/controllers/DeliveryCancelController';
 import DeliveryCheckInController from './app/controllers/DeliveryCheckInController';
 import DeliveryCheckOutController from './app/controllers/DeliveryCheckOutController';
-import DeliveryClosedController from './app/controllers/DeliveryClosedController';
 import DeliveryController from './app/controllers/DeliveryController';
 import DeliveryManController from './app/controllers/DeliveryManController';
 import DeliveryOpenedController from './app/controllers/DeliveryOpenedController';
@@ -27,23 +26,19 @@ routes.post('/sessions', SessionController.store);
 
 // Encomendas
 // Retirada da encomenda
-routes.put('/deliveries/checkin/:id', DeliveryCheckInController.update);
+routes.put(
+  '/deliveryman/:deliverymanId/deliveries/:deliveryId/checkin',
+  DeliveryCheckInController.update
+);
 
 // Entrega da encomenda
 routes.put(
-  '/deliveries/checkout/:id',
-  upload.single('signature'),
+  '/deliveryman/:deliverymanId/deliveries/:deliveryId/checkout',
   DeliveryCheckOutController.update
 );
 
 // Exibir todos os pacotes disponiveis para retirada
-routes.get(
-  '/deliveryman/:id/deliveries/available',
-  DeliveryOpenedController.index
-);
-
-// Exibir todos os pacotes do entregador que foram entregues
-routes.get('/deliveryman/:id/deliveries', DeliveryClosedController.index);
+routes.get('/deliveryman/:id/deliveries', DeliveryOpenedController.index);
 
 // Verificar todas as encomendas que tem algum problema
 routes.get('/problems', ProblemController.index);
@@ -55,11 +50,20 @@ routes.get('/delivery/:id/problems', DeliveryProblemController.index);
 routes.post('/delivery/:id/problems', DeliveryProblemController.store);
 
 // Cancelar a encomenda
-routes.delete('/problem/:id/cancel-delivery', DeliveryCancelController.destroy);
+routes.post('/problem/:id/cancel-delivery', DeliveryCancelController.store);
+
+routes.post('/files', upload.single('file'), FileController.store);
 
 routes.use(authMiddleware);
 
-routes.post('/files', upload.single('file'), FileController.store);
+// Exibir todos os usuários
+routes.get('/users', UserController.index);
+
+// Editar um usuário
+routes.put('/users/:id', UserController.update);
+
+// Deletar um usuário
+routes.delete('/users/:id', UserController.delete);
 
 // Exibir todos os entregadores
 routes.get('/deliverymen', DeliveryManController.index);

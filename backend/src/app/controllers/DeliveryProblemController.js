@@ -7,15 +7,32 @@ class DeliveryProblemController {
   async index(req, res) {
     const { id } = req.params;
 
-    const deliveryExists = await Delivery.findByPk(id);
+    if (id) {
+      /**
+       * List all problems from a delivery based on id of this
+       */
 
-    if (!deliveryExists) {
-      return res.status(400).json({ error: 'Delivery not found.' });
+      const problemsInDelivery = await DeliveryProblem.findAll({
+        where: {
+          delivery_id: id,
+        },
+        order: [['id', 'DESC']],
+        attributes: ['id', 'description', 'createdAt'],
+      });
+
+      if (problemsInDelivery.length === 0) {
+        return res.status(400).json({ error: 'This delivery has no problem.' });
+      }
+
+      return res.json(problemsInDelivery);
     }
 
-    const deliveryProblems = await DeliveryProblem.findAll();
+    const problems = await DeliveryProblem.findAll({
+      attributes: ['id', 'description', 'delivery_id'],
+      order: [['id', 'DESC']],
+    });
 
-    return res.json(deliveryProblems);
+    return res.json(problems);
   }
 
   async store(req, res) {
@@ -29,6 +46,12 @@ class DeliveryProblemController {
 
     const { id } = req.params;
 
+    const { description } = req.body;
+
+    /**
+     * Delivery validator
+     */
+
     const deliveryExists = await Delivery.findByPk(id);
 
     if (!deliveryExists) {
@@ -37,7 +60,7 @@ class DeliveryProblemController {
 
     const deliveryProblem = await DeliveryProblem.create({
       delivery_id: id,
-      description: req.body.description,
+      description,
     });
 
     return res.json(deliveryProblem);

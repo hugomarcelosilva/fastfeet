@@ -1,5 +1,4 @@
-import { format, parseISO } from 'date-fns';
-import pt from 'date-fns/locale/pt';
+import { object, date } from 'yup';
 
 import Queue from '../../lib/Queue';
 import DeliveryCancelMail from '../jobs/DeliveryCancelMail';
@@ -8,64 +7,72 @@ import DeliveryMan from '../models/DeliveryMan';
 import DeliveryProblem from '../models/DeliveryProblem';
 
 class DeliveryCancelController {
-  async destroy(req, res) {
+  async store(req, res) {
+    const schema = object().shape({
+      canceled_at: date(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails.' });
+    }
+
     const { id } = req.params;
 
-    const deliveryProblemExists = await DeliveryProblem.findOne({
-      where: { id },
-    });
+    const problem = await DeliveryProblem.findByPk(id);
 
-    if (!deliveryProblemExists) {
-      return res.status(400).json({ error: 'DeliveryProblem not found.' });
-    }
-
-    const delivery = await Delivery.findByPk(
-      deliveryProblemExists.delivery_id,
-      {
-        include: [
-          {
-            model: DeliveryMan,
-            as: 'deliveryman',
-            attributes: ['id', 'name', 'email'],
-          },
-        ],
-      }
-    );
-
-    if (delivery.end_date !== null && delivery.signature_id !== null) {
+    if (!problem) {
       return res
-        .status(401)
-        .json({ error: "This delivery it's already completed" });
+        .status(400)
+        .json({ error: 'Delivery problem does not found.' });
     }
 
-    await delivery.update({
-      canceled_at: new Date(),
+    const { delivery_id } = problem;
+
+    const delivery = await Delivery.findOne({
+      id: delivery_id,
     });
 
-    const startDate = delivery.start_date
-      ? format(
-          parseISO(delivery.start_date),
-          "'dia' dd 'de' MMMM', às' H:mm'h'",
-          { locale: pt }
-        )
-      : 'Não informada';
+    if (!delivery) {
+      return res
+        .status(400)
+        .json({ error: 'A delivery referred to this problem are not found' });
+    }
 
-    const endDate = delivery.end_date
-      ? format(
-          parseISO(delivery.end_date),
-          "'dia' dd 'de' MMMM', às' H:mm'h'",
-          { locale: pt }
-        )
-      : 'Não informada';
+    const { canceled_at } = req.body;
+
+    const {
+      product,
+      start_date,
+      recipient_id,
+      deliveryman_id,
+    } = await delivery.update({
+      canceled_at: canceled_at || new Date(),
+      end_date: null,
+      status: 'CANCELED',
+    });
+
+    const deliveryman = await DeliveryMan.findOne({
+      where: {
+        id: deliveryman_id,
+      },
+    });
 
     await Queue.add(DeliveryCancelMail.key, {
-      delivery,
-      problem: deliveryProblemExists,
-      startDate,
-      endDate,
+      deliveryman,
+      product,
+      problem: problem.description,
+      canceled_at: canceled_at || new Date(),
     });
 
-    return res.status(204).send();
+    return res.json({
+      id,
+      delivery_id,
+      product,
+      start_date,
+      canceled_at,
+      recipient_id,
+      deliveryman_id,
+    });
   }
 }
 

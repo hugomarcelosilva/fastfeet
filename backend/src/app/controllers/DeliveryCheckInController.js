@@ -1,7 +1,5 @@
-import { Op } from 'sequelize';
-
-import { object, number } from 'yup';
-import { startOfDay, endOfDay } from 'date-fns';
+import { object, date } from 'yup';
+import { startOfDay, isBefore, getHours, parseISO } from 'date-fns';
 
 import Delivery from '../models/Delivery';
 import DeliveryMan from '../models/DeliveryMan';
@@ -9,54 +7,89 @@ import DeliveryMan from '../models/DeliveryMan';
 class DeliveryCheckInController {
   async update(req, res) {
     const schema = object().shape({
-      deliveryman_id: number().required(),
+      start_date: date(),
+      end_date: date(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation fails.' });
     }
 
-    const { id } = req.params;
+    const { deliveryId, deliverymanId } = req.params;
 
-    const delivery = await Delivery.findByPk(id);
+    /**
+     * Deliveryman verifier
+     */
+
+    const deliveryman = await DeliveryMan.findByPk(deliverymanId);
+
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found. ' });
+    }
+
+    /**
+     * Delivery verifier
+     */
+
+    const delivery = await Delivery.findByPk(deliveryId);
 
     if (!delivery) {
       return res.status(400).json({ error: 'Delivery not found. ' });
     }
 
-    const { deliveryman_id } = req.body;
+    /**
+     * Limit validators to max 5 pickups per day
+     */
 
-    const deliveryman = await DeliveryMan.findByPk(deliveryman_id);
-
-    if (!deliveryman) {
-      return res.status(400).json({ error: 'DeliveryMan not found. ' });
-    }
-
-    if (delivery.deliveryman_id !== deliveryman.id) {
-      return res
-        .status(400)
-        .json({ error: 'Delivery not registered to the DeliveryMan. ' });
-    }
-
-    const dayDeliveries = await Delivery.findAll({
+    const allDeliveries = await Delivery.findAll({
       where: {
-        deliveryman_id: req.body.deliveryman_id,
-        start_date: {
-          [Op.between]: [startOfDay(new Date()), endOfDay(new Date())],
-        },
+        deliveryman_id: deliverymanId,
       },
     });
 
-    if (dayDeliveries.length >= 5) {
-      return res.status(401).json({
-        error: 'This DeliveryMan has exceeded the limit of 5 pickups per day.',
+    const today = new Date();
+    const thisToday = startOfDay(today);
+
+    let countPicks = 0;
+
+    allDeliveries.forEach(d => {
+      if (isBefore(thisToday, d.start_date)) {
+        countPicks++;
+      }
+    });
+
+    if (countPicks >= 5) {
+      res.status(400).json({
+        error: 'This deliveryman has exceeded the limit of 5 pickups per day.',
       });
     }
 
-    delivery.start_date = new Date();
-    await delivery.save();
+    /**
+     * End of verificaitons and start of update method
+     */
 
-    return res.json(delivery);
+    const { start_date } = req.body;
+
+    const startTime = getHours(parseISO(start_date));
+
+    if (startTime < 8 || startTime >= 18) {
+      return res.status(400).json({
+        error: 'Delivery pickups are available only between 8am and 6pm',
+      });
+    }
+
+    const { product, canceled_at, recipient_id } = await delivery.update({
+      start_date,
+      status: 'WITHDRAWN',
+    });
+
+    return res.json({
+      product,
+      recipient_id,
+      canceled_at,
+      end_date: delivery.end_date,
+      start_date,
+    });
   }
 }
 

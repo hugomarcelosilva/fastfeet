@@ -1,10 +1,78 @@
-import { object, number, string } from 'yup';
+import { object, number as YupNumber, string } from 'yup';
+import { Op } from 'sequelize';
 
 import Recipient from '../models/Recipient';
 
 class RecipientController {
   async index(req, res) {
-    const recipients = await Recipient.findAll();
+    const { recipientName, recipientId } = req.query;
+
+    if (recipientName) {
+      const recipient = await Recipient.findAll({
+        where: {
+          name: {
+            [Op.iLike]: `%${recipientName}%`,
+          },
+        },
+        order: [['id', 'DESC']],
+        attributes: [
+          'id',
+          'name',
+          'street',
+          'number',
+          'complement',
+          'state',
+          'city',
+          'zip_code',
+        ],
+      });
+
+      if (!recipient) {
+        return res.status(400).json({ error: 'Recipient not found.' });
+      }
+
+      return res.json(recipient);
+    }
+
+    if (recipientId) {
+      const recipient = await Recipient.findOne({
+        where: {
+          id: recipientId,
+        },
+        order: [['id', 'DESC']],
+        attributes: [
+          'id',
+          'name',
+          'street',
+          'number',
+          'complement',
+          'state',
+          'city',
+          'zip_code',
+        ],
+      });
+
+      if (!recipient) {
+        return res.status(400).json({ error: 'Recipient not found.' });
+      }
+
+      return res.json({
+        recipient,
+      });
+    }
+
+    const recipients = await Recipient.findAll({
+      attributes: [
+        'id',
+        'name',
+        'street',
+        'number',
+        'complement',
+        'state',
+        'city',
+        'zip_code',
+      ],
+    });
 
     return res.json(recipients);
   }
@@ -13,7 +81,7 @@ class RecipientController {
     const schema = object().shape({
       name: string().required(),
       street: string().required(),
-      number: number().required(),
+      number: YupNumber().required(),
       complement: string(),
       state: string().required(),
       city: string().required(),
@@ -24,28 +92,37 @@ class RecipientController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
+    const { name, street, number, state, city, zip_code } = req.body;
+
     const recipientExists = await Recipient.findOne({
-      where: { name: req.body.name },
+      where: { name },
     });
 
     if (recipientExists) {
       return res.status(401).json({ error: 'Recipient already exists.' });
     }
 
-    const recipient = await Recipient.create(req.body);
+    await Recipient.create(req.body);
 
-    return res.json(recipient);
+    return res.json({
+      name,
+      street,
+      number,
+      state,
+      city,
+      zip_code,
+    });
   }
 
   async update(req, res) {
     const schema = object().shape({
       name: string().required(),
-      street: string(),
-      number: number(),
+      street: string().required(),
+      number: YupNumber().required(),
       complement: string(),
-      state: string(),
-      city: string(),
-      zip_code: string(),
+      state: string().required(),
+      city: string().required(),
+      zip_code: string().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -60,9 +137,36 @@ class RecipientController {
       return res.status(400).json({ error: 'Recipient not found.' });
     }
 
-    const recipient = await recipientExists.update(req.body);
+    const { name } = req.body;
 
-    return res.json(recipient);
+    if (name !== recipientExists.name) {
+      const recipientExists = await Recipient.findOne({
+        where: { name },
+      });
+
+      if (recipientExists) {
+        return res
+          .status(401)
+          .json({ error: 'A recipient with this name already exists.' });
+      }
+    }
+
+    const {
+      street,
+      number,
+      state,
+      city,
+      zip_code,
+    } = await recipientExists.update(req.body);
+
+    return res.json({
+      name,
+      street,
+      number,
+      state,
+      city,
+      zip_code,
+    });
   }
 
   async delete(req, res) {
@@ -74,9 +178,29 @@ class RecipientController {
       return res.status(400).json({ error: 'Recipient not found' });
     }
 
-    await recipientExists.destroy(id);
+    await recipientExists.destroy();
 
-    return res.status(204).send();
+    const recipients = await Recipient.findAll({
+      attributes: [
+        'id',
+        'name',
+        'street',
+        'number',
+        'complement',
+        'state',
+        'city',
+        'zip_code',
+      ],
+    });
+
+    if (recipients.length === 0) {
+      return res.status(200).json({
+        error:
+          'No one recipient was found. Please register someone and try again. ',
+      });
+    }
+
+    return res.json(recipients);
   }
 }
 
