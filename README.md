@@ -20,6 +20,10 @@
 
 ## :gear: Back-end
 
+### :information_source: Deploy
+
+- https://fastfeet-api-hugo.herokuapp.com
+
 ### :information_source: Instruções Back-end
 
 #### :whale: Executando com Docker Compose
@@ -60,6 +64,24 @@ yarn dev
 # executar os testes
 yarn test
 
+```
+
+---
+
+## :computer: Front-end
+
+### :information_source: Deploy
+
+- https://fastfeet-web-hugo.herokuapp.com
+
+### :information_source: Instruções Front-end
+
+```bash
+#instalar os pacotes e dependências
+yarn
+
+# iniciar a aplicação web
+yarn start
 ```
 
 ---
