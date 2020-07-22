@@ -59,7 +59,7 @@ export const Button = styled(SimpleButton)`
   height: 36px;
   background: ${colors.primary};
   border: 0;
-  color: #fff;
+  color: ${colors.white};
   display: flex;
   justify-content: center;
   align-items: center;
