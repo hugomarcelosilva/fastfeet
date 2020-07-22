@@ -24,6 +24,12 @@ routes.post('/users', UserController.store);
 // Fazer login na aplicação
 routes.post('/sessions', SessionController.store);
 
+// Exibir todos os pacotes disponiveis para retirada
+routes.get('/deliveryman/:id/deliveries', DeliveryOpenedController.index);
+
+// Exibir todos os entregadores
+routes.get('/deliverymen', DeliveryManController.index);
+
 // Encomendas
 // Retirada da encomenda
 routes.put(
@@ -36,9 +42,6 @@ routes.put(
   '/deliveryman/:deliverymanId/deliveries/:deliveryId/checkout',
   DeliveryCheckOutController.update
 );
-
-// Exibir todos os pacotes disponiveis para retirada
-routes.get('/deliveryman/:id/deliveries', DeliveryOpenedController.index);
 
 // Verificar todas as encomendas que tem algum problema
 routes.get('/problems', ProblemController.index);
@@ -64,9 +67,6 @@ routes.put('/users/:id', UserController.update);
 
 // Deletar um usuário
 routes.delete('/users/:id', UserController.delete);
-
-// Exibir todos os entregadores
-routes.get('/deliverymen', DeliveryManController.index);
 
 // Criar um novo entregador
 routes.post('/deliverymen', DeliveryManController.store);
