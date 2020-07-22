@@ -14,6 +14,10 @@
 <a href="https://www.codacy.com/manual/hugo-marcelo/fastfeet?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hugo-marcelo/fastfeet&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/147d0b2836734c79b7ee5ea035f065b4"/></a>
 </p>
 
+<h3 align="center">
+  <a href="https://insomnia.rest/run/?label=FastFeet&uri=https%3A%2F%2Fraw.githubusercontent.com%2Fhugo-marcelo%2Ffastfeet%2Fmaster%2Fbackend%2FInsomnia.json" target="_blank"><img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia"></a>
+</h3>
+
 ## :gear: Back-end
 
 ### :information_source: Instruções Back-end
